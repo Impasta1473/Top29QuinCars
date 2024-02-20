@@ -1,0 +1,91 @@
+import java.util.Scanner;
+
+public class MinecraftSphere {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("Enter the x diameter (in blocks): ");
+        int x = validateInput(scanner);
+
+        System.out.print("Enter the y diameter (in blocks): ");
+        int y = validateInput(scanner);
+
+        System.out.print("Enter the z diameter (in blocks): ");
+        int z = validateInput(scanner);
+
+        System.out.print("Enter 0 for hollow or 1 for filled: ");
+        int fillOption = validateFillOption(scanner);
+
+        for (int i = 0; i < y; i++) {
+            printSphereLayer(x, y, z, i, fillOption);
+            System.out.println(); // Move to the next line after each layer
+        }
+    }
+
+    private static int validateInput(Scanner scanner) {
+        int value;
+        do {
+            while (!scanner.hasNextInt()) {
+                System.out.println("Invalid input. Please enter a valid integer.");
+                scanner.next(); // consume the invalid input
+            }
+            value = scanner.nextInt();
+            if (value < 3) {
+                System.out.println("Invalid input. Please enter a number greater than or equal to 3.");
+            }
+        } while (value < 3);
+        return value;
+    }
+
+    private static int validateFillOption(Scanner scanner) {
+        int option;
+        do {
+            while (!scanner.hasNextInt()) {
+                System.out.println("Invalid input. Please enter 0 for hollow or 1 for filled.");
+                scanner.next(); // consume the invalid input
+            }
+            option = scanner.nextInt();
+            if (option != 0 && option != 1) {
+                System.out.println("Invalid input. Please enter 0 for hollow or 1 for filled.");
+            }
+        } while (option != 0 && option != 1);
+        return option;
+    }
+
+    private static void printSphereLayer(int x, int y, int z, int currentLayer, int fillOption) {
+        int maxRadius = Math.min(Math.min(x, y), z) / 2;
+
+        for (int i = 0; i < z; i++) {
+            for (int j = 0; j < x; j++) {
+                double distanceToCenter = Math.pow((j - (x - 1) / 2.0) / ((x - 1) / 2.0), 2) +
+                        Math.pow((i - (z - 1) / 2.0) / ((z - 1) / 2.0), 2) +
+                        Math.pow((currentLayer - (y - 1) / 2.0) / ((y - 1) / 2.0), 2);
+
+                boolean isOnCircularEdge = isOnCircularEdge(j, i, x, z, currentLayer, y);
+
+                boolean isHollow = fillOption == 0 && isOnCircularEdge && distanceToCenter < Math.pow(maxRadius, 2);
+                boolean isFilled = fillOption == 1 && distanceToCenter <= Math.pow(maxRadius, 2);
+
+                if (isHollow || isFilled) {
+                    System.out.print("#");
+                } else {
+                    System.out.print(" ");
+                }
+            }
+            System.out.println();
+        }
+    }
+
+    private static boolean isOnCircularEdge(int j, int i, int x, int z, int currentLayer, int y) {
+        int maxRadius = Math.min(Math.min(x, y), z) / 2;
+
+        double distanceToCenter = Math.pow((j - (x - 1) / 2.0) / ((x - 1) / 2.0), 2) +
+                Math.pow((i - (z - 1) / 2.0) / ((z - 1) / 2.0), 2) +
+                Math.pow((currentLayer - (y - 1) / 2.0) / ((y - 1) / 2.0), 2);
+
+        double innerRadius = Math.pow(maxRadius - 0.5, 2);
+        double outerRadius = Math.pow(maxRadius + 0.1, 2);
+
+        return distanceToCenter >= innerRadius && distanceToCenter < outerRadius;
+    }
+}
